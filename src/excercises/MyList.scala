@@ -298,10 +298,12 @@ object ListTester extends App {
   println(addedLists)
   assert(addedLists.toString.equals("[4, 6, 5, 7]"))
   val addInts = (start : Int, adder : Int) => start + adder
-  println(secondList.fold(0, addInts))
-  assert(secondList.fold(0, addInts).equals(15))
+  val secondListFolded = secondList.fold(0, addInts)
+  println(secondListFolded)
+  assert(secondListFolded.equals(15))
   val addStrings = (start : String, adder : String) => start + adder
-  println(populatedListOfStrings.fold("", addStrings))
-  assert(populatedListOfStrings.fold("", addStrings).equals("tes4test5teste6"))
+  val popStringsFolded = populatedListOfStrings.fold("", addStrings)
+  println(popStringsFolded)
+  assert(popStringsFolded.equals("tes4test5teste6"))
  }
 
