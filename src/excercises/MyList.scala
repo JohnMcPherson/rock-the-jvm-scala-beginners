@@ -158,25 +158,29 @@ class Cons[+A](val head: A, val tail: MyList[A]) extends MyList[A] {
 
   override def sort(compare: (A, A) => Int): MyList[A] = {
     @tailrec
-    def insert(value : A, reverseSortedHeadList: MyList[A] = EmptyList, sortedTail : MyList[A]) : MyList[A] = {
-      if (sortedTail.isEmpty && reverseSortedHeadList.isEmpty) sortedTail.add(value)
-      else if (reverseSortedHeadList.isEmpty) {
-        if (compare(value, sortedTail.head) <= 0) sortedTail.add(value)
-        else insert(value, reverseSortedHeadList.add(sortedTail.head), sortedTail.tail)
+    def insert(value: A, reverseSortedHeadList: MyList[A] = EmptyList, sortedTail: MyList[A]): MyList[A] = {
+      def isBetweenHeadOfLists: Boolean = {
+        def valGreaterOrEqualHeadOfReversedList(): Boolean = {
+          (reverseSortedHeadList.isEmpty || compare(value, reverseSortedHeadList.head) >= 0)
+        }
+
+        def valLessOrEqualHeadOfSortedList(): Boolean = {
+          sortedTail.isEmpty || compare(value, sortedTail.head) <= 0
+        }
+
+        valGreaterOrEqualHeadOfReversedList() && valLessOrEqualHeadOfSortedList()
       }
-      else if (compare(value, reverseSortedHeadList.head) <= 0) insert(value, reverseSortedHeadList.add(sortedTail.head), sortedTail.tail)
-      else {
-        if (sortedTail.isEmpty) reverseSortedHeadList.add(value).reverse
-        else if (compare(value, sortedTail.head) <= 0) reverseSortedHeadList.add(value).reverse ++ sortedTail
-        else insert(value, reverseSortedHeadList.add(sortedTail.head), sortedTail.tail)
-      }
-    }
+
+      if (isBetweenHeadOfLists) reverseSortedHeadList.add(value).reverse ++ sortedTail
+      else insert(value, reverseSortedHeadList.add(sortedTail.head), sortedTail.tail)
+  }
 
     @tailrec
-    def sortHelper(remainingUnsorted : MyList[A] = this, sortedTail : MyList[A] = EmptyList): MyList[A] = {
+    def sortHelper(remainingUnsorted: MyList[A] = this, sortedTail: MyList[A] = EmptyList): MyList[A] = {
       if (remainingUnsorted.isEmpty) sortedTail
       else sortHelper(remainingUnsorted.tail, insert(remainingUnsorted.head, reverseSortedHeadList = EmptyList, sortedTail = sortedTail))
     }
+
     sortHelper()
   }
 
