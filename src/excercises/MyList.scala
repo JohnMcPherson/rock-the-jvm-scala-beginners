@@ -2,6 +2,7 @@ package excercises
 
 import excercises.EmptyList.addListToList
 
+import java.util.NoSuchElementException
 import scala.annotation.tailrec
 
 abstract case class MyList[+A]() {
@@ -44,6 +45,8 @@ abstract case class MyList[+A]() {
 
   def zipWith[C >: A, B] (other : MyList[C], f: (A, C) => B) : MyList[B]
 
+  def fold[B] (startValue : B, operator : (B, A) => B) : B
+
   override def toString: String = "[" + elements + "]"
 }
 
@@ -71,6 +74,8 @@ object EmptyList extends MyList[Nothing] {
   override def sort(compare: (Nothing, Nothing) => Int): MyList[Nothing] = EmptyList
 
   override def zipWith[C >: Nothing, B](other: MyList[C], f: (Nothing, C) => B): MyList[B] = EmptyList
+
+  override def fold[B](startValue: B, operator: (B, Nothing) => B): B = startValue
 }
 
 class Cons[+A](val head: A, val tail: MyList[A]) extends MyList[A] {
@@ -195,6 +200,17 @@ class Cons[+A](val head: A, val tail: MyList[A]) extends MyList[A] {
     }
     zipWithHelper().reverse
   }
+
+  override def fold[B](startValue: B, operator: (B, A) => B): B = {
+
+    @tailrec
+    def foldHelper(interimValue : B = startValue, remainingTail : MyList[A] = this): B = {
+      val nextInterim : B = operator(interimValue, remainingTail.head)
+      if (remainingTail.tail.isEmpty) nextInterim
+      else foldHelper(nextInterim, remainingTail.tail)
+    }
+    foldHelper()
+  }
 }
 
 object ListTester extends App {
@@ -281,5 +297,11 @@ object ListTester extends App {
   val addedLists = evenTransformedToInts ++ evenTransformedToIntsMappedToOnePlus
   println(addedLists)
   assert(addedLists.toString.equals("[4, 6, 5, 7]"))
+  val addInts = (start : Int, adder : Int) => start + adder
+  println(secondList.fold(0, addInts))
+  assert(secondList.fold(0, addInts).equals(15))
+  val addStrings = (start : String, adder : String) => start + adder
+  println(populatedListOfStrings.fold("", addStrings))
+  assert(populatedListOfStrings.fold("", addStrings).equals("tes4test5teste6"))
  }
 
