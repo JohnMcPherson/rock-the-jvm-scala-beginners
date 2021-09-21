@@ -213,6 +213,21 @@ class Cons[+A](val head: A, val tail: MyList[A]) extends MyList[A] {
   }
 }
 
+object Currier {
+  def toCurry[A, B, T](f : (A, B) => T) : A => B => T = {
+    x => y => f(x, y)
+  }
+
+  def fromCurry[A, B, T] (f: A => B => T) : (A, B) => T =
+    (x, y) => f(x)(y)
+
+  def compose[A, B, T] (f: A => B, g: T => A) : T => B =
+    (x : T) => f(g(x))
+
+  def andThen[A, B, T](f: A => B, g: B => T): A => T =
+    (x: A) => g(f(x))
+}
+
 object ListTester extends App {
   val isEven : (Int) => Boolean = (input: Int) => input % 2 == 0
   val stringToInt : (String) => Int = (input : String) => input.length
@@ -305,5 +320,30 @@ object ListTester extends App {
   val popStringsFolded = populatedListOfStrings.fold("", addStrings)
   println(popStringsFolded)
   assert(popStringsFolded.equals("tes4test5teste6"))
+
+  val functionXY : (Int, Int) => Int = (x : Int, y : Int) => 2*x + y*y
+  val functionXY7and3 = functionXY(7,3)
+  println(functionXY7and3)
+  assert(functionXY7and3.equals(23))
+  val currriedFunctionXY = Currier.toCurry(functionXY)
+  val curriedFunction7and3 = currriedFunctionXY(7)(3)
+  println(curriedFunction7and3)
+  assert(curriedFunction7and3.equals(23))
+  val newUncurriedFunctionXY : (Int, Int) => Int = Currier.fromCurry(currriedFunctionXY)
+  val newUncurriedFunctionXY7and3 = newUncurriedFunctionXY(7,3)
+  println(newUncurriedFunctionXY7and3)
+  assert(newUncurriedFunctionXY7and3.equals(23))
+
+  val functionF : Int => Int = (x: Int) => 7*x
+  val functionG : Int => Int = (x: Int) => x * x
+  val composedFandG : Int => Int = Currier.compose(functionF, functionG)
+  val FonGon3 = functionF(functionG(3))
+  println(FonGon3)
+  assert(FonGon3.equals(63))
+
+  val andThenFandG : Int => Int = Currier.andThen(functionF, functionG)
+  val andThenFGon3 = functionG(functionF(3))
+  println(andThenFGon3)
+  assert(andThenFGon3.equals(441))
  }
 
