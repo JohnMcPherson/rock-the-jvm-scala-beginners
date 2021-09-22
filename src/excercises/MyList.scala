@@ -340,10 +340,14 @@ object ListTester extends App {
   val FonGon3 = functionF(functionG(3))
   println(FonGon3)
   assert(FonGon3.equals(63))
+  println(composedFandG(3))
+  assert (composedFandG(3).equals(FonGon3))
 
   val andThenFandG : Int => Int = Currier.andThen(functionF, functionG)
   val andThenFGon3 = functionG(functionF(3))
   println(andThenFGon3)
+  println(andThenFandG(3))
   assert(andThenFGon3.equals(441))
+  assert(andThenFGon3.equals(andThenFandG(3)))
  }
 
