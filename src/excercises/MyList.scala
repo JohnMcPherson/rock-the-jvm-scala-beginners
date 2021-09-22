@@ -222,10 +222,10 @@ object Currier {
     (x, y) => f(x)(y)
 
   def compose[A, B, T] (f: A => B, g: T => A) : T => B =
-    (x : T) => f(g(x))
+    x => f(g(x))
 
-  def andThen[A, B, T](f: A => B, g: B => T): A => T =
-    (x: A) => g(f(x))
+  def andThen[A, B, C](f: A => B, g: B => C): A => C =
+    x => g(f(x))
 }
 
 object ListTester extends App {
