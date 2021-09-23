@@ -6,6 +6,8 @@ import java.util.NoSuchElementException
 import scala.annotation.tailrec
 
 abstract case class MyList[+A]() {
+  def withFilter (predicate : A => Boolean) : MyList[A] = filter (predicate)
+
   def head: A
 
   def tail: MyList[A]
@@ -61,7 +63,7 @@ object EmptyList extends MyList[Nothing] {
 
   override def reverse: EmptyList.type = this
 
-  override def map[B](transformer: (Nothing) => B) : MyList[B] = EmptyList
+  override def map[B](transformer: Nothing => B) : MyList[B] = EmptyList
 
   override def filter(predicate: (Nothing) => Boolean): MyList[Nothing] = EmptyList
 

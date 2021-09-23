@@ -25,14 +25,14 @@ object MapFlatmapFilterFor extends App {
   val myListChars = EmptyList.add('d').add('c').add('b').add('a')
 
   val myListCombine : (MyList[Int], MyList[Char]) => MyList[String] =
-    (numList, charList) => charList.flatMap(c => numList.map(n => "" + c + n))
+    (numList, charList) => charList.flatMap(c => numList.filter(_ % 2 == 0).map(n => "" + c + n))
   val myListCombinedNumbersToString = myListCombine(myListNumbers, myListChars).toString()
   println(myListCombinedNumbersToString)
-  assert(myListCombinedNumbersToString.equals("[a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4]"))
+  assert(myListCombinedNumbersToString.equals("[a2, a4, b2, b4, c2, c4, d2, d4]"))
 
   val myListCombinedUsingForComp = for {
     c <- myListChars
-    n <- myListNumbers
+    n <- myListNumbers if n % 2 == 0
   } yield "" + c + n
 
   println(myListCombinedUsingForComp.toString)
