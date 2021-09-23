@@ -22,7 +22,7 @@ abstract case class MyList[+A]() {
 
   def map[B](transformer: A => B) : MyList[B]
 
-  def flatmap[B](transformer: A => MyList[B]) : MyList[B]
+  def flatMap[B](transformer: A => MyList[B]) : MyList[B]
 
   def filter (predicate : A => Boolean) : MyList[A]
 
@@ -39,7 +39,7 @@ abstract case class MyList[+A]() {
     helperForAddToList(secondList, firstList.reverse)
   }
 
-  def forEach (f: A => Unit) : MyList[A]
+  def forEach(f: A => Unit) : MyList[A]
 
   def sort (compare: (A, A) => Int) : MyList[A]
 
@@ -61,11 +61,11 @@ object EmptyList extends MyList[Nothing] {
 
   override def reverse: EmptyList.type = this
 
-  override def map[B] (transformer: (Nothing) => B) : MyList[B] = EmptyList
+  override def map[B](transformer: (Nothing) => B) : MyList[B] = EmptyList
 
   override def filter(predicate: (Nothing) => Boolean): MyList[Nothing] = EmptyList
 
-  override def flatmap[B](transformer: Nothing => MyList[B]): MyList[B] = EmptyList
+  override def flatMap[B](transformer: Nothing => MyList[B]): MyList[B] = EmptyList
 
   override def ++[B] (list : MyList[B]) : MyList[B] = list
 
@@ -127,7 +127,7 @@ class Cons[+A](val head: A, val tail: MyList[A]) extends MyList[A] {
     filterHelper(remainingInputTail = this).reverse
   }
 
-  override def flatmap[C](transformer: A => MyList[C]): MyList[C] = {
+  override def flatMap[C](transformer: A => MyList[C]): MyList[C] = {
 
     @tailrec
     def flatmapHelper(partialResult : MyList[C] = EmptyList, remainingInputTail: MyList[A]) : MyList[C] = {
@@ -290,10 +290,10 @@ object ListTester extends App {
   val transformThreeAddedToEmptyList = EmptyList ++ transformThree
   println("EmptyList ++ transformThree: " + transformThreeAddedToEmptyList)
   assert(transformThreeAddedToEmptyList.toString.equals("[3, 6]"))
-  val flatmappedListOfSingleIntInput = EmptyList.add(4).flatmap(transformIntToTwoInts)
+  val flatmappedListOfSingleIntInput = EmptyList.add(4).flatMap(transformIntToTwoInts)
   flatmappedListOfSingleIntInput.printElements()
   assert(flatmappedListOfSingleIntInput.toString.equals("[4, 8]"))
-  val flattenedListOfIntsToInts = transformedStringsToInts.flatmap((input: Int) => EmptyList.add(input * 2).add(input))
+  val flattenedListOfIntsToInts = transformedStringsToInts.flatMap((input: Int) => EmptyList.add(input * 2).add(input))
   flattenedListOfIntsToInts.printElements()
   assert(flattenedListOfIntsToInts.toString.equals("[4, 8, 5, 10, 6, 12]"))
   val clonedPopulatedList = emptyList.add(1).add(2).add(3)
@@ -349,5 +349,6 @@ object ListTester extends App {
   println(andThenFandG(3))
   assert(andThenFGon3.equals(441))
   assert(andThenFGon3.equals(andThenFandG(3)))
+
  }
 
