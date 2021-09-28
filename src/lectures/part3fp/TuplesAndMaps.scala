@@ -1,5 +1,7 @@
 package lectures.part3fp
 
+import scala.annotation.tailrec
+
 class SocialNetwork (val persons: List[String] = List(), val friends : Map[String, String] = Map()) {
   def addPerson(newPerson: String) : SocialNetwork = {
       val newPersons: List[String] = persons.prepended(newPerson)
@@ -78,25 +80,23 @@ object TuplesAndMaps extends App {
     network.count(it => numFriendsOfPerson(network, it._1)==0)
 
   def hasSocialConnection(network: Map[String, List[String]], firstPerson: String, secondPerson: String): Boolean = {
-    def hasSocialConnectionHelper(listToTest: List[String], peopleChecked: List[String] = List()): Boolean = {
-      if (listToTest.isEmpty) return false
-      val itemToTest = listToTest.head
-      if (itemToTest.equals(secondPerson)) return true
-      if (peopleChecked.contains(itemToTest)) {
-        hasSocialConnectionHelper(listToTest.tail, peopleChecked)
-      } else {
-        val newListToTest = network.find(_._1 == itemToTest).get
-        if (hasSocialConnectionHelper(newListToTest._2, peopleChecked)) true
-        else {
-          val newPeopleChecked = peopleChecked.appended(itemToTest)
-          hasSocialConnectionHelper(listToTest.tail, newPeopleChecked)
+    @tailrec
+    def hasSocialConnectionHelper(personToTest: String, remainingDirectConnectonsToTest: List[String], peopleChecked: List[String] = List()): Boolean = {
+      if (personToTest.equals(secondPerson)) true else {
+        if (remainingDirectConnectonsToTest.isEmpty) return false
+        val itemToTest = remainingDirectConnectonsToTest.head
+        if (itemToTest.equals(secondPerson)) return true
+        if (peopleChecked.contains(itemToTest)) {
+          hasSocialConnectionHelper(personToTest, remainingDirectConnectonsToTest.tail, peopleChecked)
+        } else {
+          hasSocialConnectionHelper(itemToTest, network.find(_._1 == itemToTest).get._2, peopleChecked)
         }
       }
     }
 
     if (isInNetwork(network, firstPerson) && isInNetwork(network, secondPerson)) {
       val networkItemToTest = network.find(_._1 == firstPerson).get
-      hasSocialConnectionHelper(listToTest = networkItemToTest._2)
+      hasSocialConnectionHelper(networkItemToTest._1, networkItemToTest._2)
     } else false
     // for each direct connection not in peopleChecked list
     // if target in direct connection return true
