@@ -74,16 +74,69 @@ object TuplesAndMaps extends App {
   def isInNetwork(network: Map[String, List[String]], testName : String ) : Boolean =
     network.contains(testName)
 
+  def numPeopleNoFriends(network: Map[String, List[String]]) : Int =
+    network.count(it => numFriendsOfPerson(network, it._1)==0)
+
+  def hasSocialConnection(network: Map[String, List[String]], firstPerson: String, secondPerson: String): Boolean = {
+    def hasSocialConnectionHelper(listToTest: List[String], peopleChecked: List[String] = List()): Boolean = {
+      if (listToTest.isEmpty) return false
+      val itemToTest = listToTest.head
+      if (itemToTest.equals(secondPerson)) return true
+      if (peopleChecked.contains(itemToTest)) {
+        hasSocialConnectionHelper(listToTest.tail, peopleChecked)
+      } else {
+        val newListToTest = network.find(_._1 == itemToTest).get
+        if (hasSocialConnectionHelper(newListToTest._2, peopleChecked)) true
+        else {
+          val newPeopleChecked = peopleChecked.appended(itemToTest)
+          hasSocialConnectionHelper(listToTest.tail, newPeopleChecked)
+        }
+      }
+    }
+
+    if (isInNetwork(network, firstPerson) && isInNetwork(network, secondPerson)) {
+      val networkItemToTest = network.find(_._1 == firstPerson).get
+      hasSocialConnectionHelper(listToTest = networkItemToTest._2)
+    } else false
+    // for each direct connection not in peopleChecked list
+    // if target in direct connection return true
+    // else
+    // add to peopleChecked list
+    // check in extended network (target)
+    // false
+  }
+
   val johnFriendedWithMary = friend(nwJohnBillMary, "John", "Mary")
   println("John friended with Mary: " + johnFriendedWithMary)
   println("Num John's friends: " + numFriendsOfPerson(johnFriendedWithMary,"John"))
   val maryAlsoFriendedWithBill = friend(johnFriendedWithMary, "Mary", "Bill")
   println(maryAlsoFriendedWithBill)
-  val thePersonWithMostFriends = personWithMostFriends(maryAlsoFriendedWithBill)
+  val mbjkhs_interim = addPerson(addPerson(addPerson(maryAlsoFriendedWithBill, "Kevin"), "Harry"), "Sally")
+  val mbjkhs = friend(mbjkhs_interim, "Bill", "Sally")
+  println("mbjkhs = " + mbjkhs)
+  val manWhoDoesntExist = "Mr Nobody"
+  val womanWhoDoesntExist = "Mrs Nobody"
+  val linkBetweenNobodies = hasSocialConnection(mbjkhs, manWhoDoesntExist, womanWhoDoesntExist)
+  println("link nobodies = " + linkBetweenNobodies)
+  val linkBetweenNobodyAndSomebody = hasSocialConnection(mbjkhs, manWhoDoesntExist, "Mary")
+  println("link nobody and somebody = " + linkBetweenNobodyAndSomebody)
+  val linkBetweenTwoUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Kevin")
+  println("link 2 unconnected people = " + linkBetweenTwoUnconnectedPeople)
+  val linkBetweenConnectedAndUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Mary")
+  println("link connected with unconnected = " + linkBetweenConnectedAndUnconnectedPeople)
+  val linkDirectlyConnected = hasSocialConnection(mbjkhs, "John", "Mary")
+  println("link directly connected = " + linkDirectlyConnected)
+  val linkIndirectlyConnected = hasSocialConnection(mbjkhs, "John", "Sally")
+  println("link indirectly connected = " + linkIndirectlyConnected)
+
+/*  val thePersonWithMostFriends = personWithMostFriends(mbjkh)
   println("Most friends = " + thePersonWithMostFriends)
+  println("Num people with no friends = " + numPeopleNoFriends(mbjkh))
   val john1FriendedWithMary = friend(nwJohnBillMary, "John1", "Mary")
   println("John1 friended with Mary: " + john1FriendedWithMary)
   println("Num John1's friends: " + numFriendsOfPerson(john1FriendedWithMary,"John1"))
   val johnUnfriendedWithMary = unFriend(johnFriendedWithMary, "Mary", "John" )
   println(johnUnfriendedWithMary)
+
+ */
 }
