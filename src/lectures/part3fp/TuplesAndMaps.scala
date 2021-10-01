@@ -15,22 +15,47 @@ object TuplesAndMaps extends App {
   val newJimMap: Map[String, Int] = jimMap.map(pair => pair._1.toLowerCase -> pair._2)
   println(newJimMap)
 
-  def addPerson(network :Map[String, List[String]], newPerson : String) :  Map[String, List[String]]= {
-     network + (newPerson ->  List())
+  def addPerson(network :Map[String, Set[String]], newPerson : String) :  Map[String, Set[String]]= {
+     network + (newPerson ->  Set())
   }
 
-  val emptyNetwork : Map[String, List[String]] = Map()
+  val emptyNetwork : Map[String, Set[String]] = Map()
   val nwJohnBillMary = addPerson(addPerson(addPerson(emptyNetwork, "John"), "Bill"), "Mary")
-  println(nwJohnBillMary)
+  println("nwJohnBillMary = " + nwJohnBillMary)
 
-  def removePerson(network :Map[String, List[String]], removedPerson : String) :  Map[String, List[String]]=
-    network.view.filterKeys(keyValue => !keyValue.equals(removedPerson)).toMap
+  def removePerson(network :Map[String, Set[String]], removedPerson : String) :  Map[String, Set[String]]= {
+    @tailrec
+    def unfriendRemainingFriendsOfPersonToRemove(remainingFriends : Set[String], interimNetwork : Map[String, Set[String]]) : Map[String, Set[String]] =
+      if (remainingFriends.isEmpty) interimNetwork
+      else unfriendRemainingFriendsOfPersonToRemove(remainingFriends.tail, unfriend(interimNetwork, remainingFriends.head, removedPerson))
 
-  def johnAndBillOnly : Map[String, List[String]] = removePerson(nwJohnBillMary, "Mary")
+    val nwWithPersonToRemoveCompletelyUnfriended = unfriendRemainingFriendsOfPersonToRemove(network(removedPerson), network)
+    nwWithPersonToRemoveCompletelyUnfriended - removedPerson
+  }
+
+  def johnAndBillOnly : Map[String, Set[String]] = removePerson(nwJohnBillMary, "Mary")
   println("J & B only: "+ johnAndBillOnly)
 
-  def friend (network :Map[String, List[String]], firstPerson : String, secondPerson : String) :  Map[String, List[String]] = {
-    def conditionalMapIntoList: ((String, List[String]), String, String) => (String, List[String]) =
+  def friend (network :Map[String, Set[String]], person1 : String, person2 : String) :  Map[String, Set[String]] = {
+    if (network.contains(person1) && network.contains(person2)) {
+      val friends1with2Added = network(person1) + person2
+      val friends2with1Added = network(person2) + person1
+      network + (person1 -> friends1with2Added) + (person2 -> friends2with1Added)
+    } else network
+  }
+
+  def unfriend (network :Map[String, Set[String]], person1 : String, person2 : String) :  Map[String, Set[String]] = {
+    if (network.contains(person1) && network.contains(person2)) {
+      val friends1with2Removed = network(person1) - person2
+      val friends2with1Removed = network(person2) - person1
+      network + (person1 -> friends1with2Removed) + (person2 -> friends2with1Removed)
+    }
+    else network
+  }
+
+
+  /*{
+    def conditionalMapIntoList: ((String, Set[String]), String, String) => (String, Set[String]) =
       (mapItem, stringToMatch, stringToAdd) =>
         if (mapItem._1.equals(stringToMatch)) (mapItem._1, mapItem._2.prepended(stringToAdd))
         else mapItem
@@ -50,7 +75,9 @@ object TuplesAndMaps extends App {
     else network
   }
 
-  def unFriend (network :Map[String, List[String]], firstPerson : String, secondPerson : String) :  Map[String, List[String]] = {
+   */
+
+/*  def unFriend (network :Map[String, List[String]], firstPerson : String, secondPerson : String) :  Map[String, List[String]] = {
     def conditionalUnMapFromList: ((String, List[String]), String, String) => (String, List[String]) =
       (mapItem, stringToMatch, stringToRemove) =>
         if (mapItem._1.equals(stringToMatch)) (mapItem._1, mapItem._2.filter(it => !it.equals(stringToRemove)))
@@ -105,10 +132,10 @@ object TuplesAndMaps extends App {
     // check in extended network (target)
     // false
   }
-
+*/
   val johnFriendedWithMary = friend(nwJohnBillMary, "John", "Mary")
   println("John friended with Mary: " + johnFriendedWithMary)
-  println("Num John's friends: " + numFriendsOfPerson(johnFriendedWithMary,"John"))
+//  println("Num John's friends: " + numFriendsOfPerson(johnFriendedWithMary,"John"))
   val maryAlsoFriendedWithBill = friend(johnFriendedWithMary, "Mary", "Bill")
   println(maryAlsoFriendedWithBill)
   val mbjkhs_interim = addPerson(addPerson(addPerson(maryAlsoFriendedWithBill, "Kevin"), "Harry"), "Sally")
@@ -116,27 +143,28 @@ object TuplesAndMaps extends App {
   println("mbjkhs = " + mbjkhs)
   val manWhoDoesntExist = "Mr Nobody"
   val womanWhoDoesntExist = "Mrs Nobody"
-  val linkBetweenNobodies = hasSocialConnection(mbjkhs, manWhoDoesntExist, womanWhoDoesntExist)
-  println("link nobodies = " + linkBetweenNobodies)
-  val linkBetweenNobodyAndSomebody = hasSocialConnection(mbjkhs, manWhoDoesntExist, "Mary")
-  println("link nobody and somebody = " + linkBetweenNobodyAndSomebody)
-  val linkBetweenTwoUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Kevin")
-  println("link 2 unconnected people = " + linkBetweenTwoUnconnectedPeople)
-  val linkBetweenConnectedAndUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Mary")
-  println("link connected with unconnected = " + linkBetweenConnectedAndUnconnectedPeople)
-  val linkDirectlyConnected = hasSocialConnection(mbjkhs, "John", "Mary")
-  println("link directly connected = " + linkDirectlyConnected)
-  val linkIndirectlyConnected = hasSocialConnection(mbjkhs, "John", "Sally")
-  println("link indirectly connected = " + linkIndirectlyConnected)
+//  val linkBetweenNobodies = hasSocialConnection(mbjkhs, manWhoDoesntExist, womanWhoDoesntExist)
+//  println("link nobodies = " + linkBetweenNobodies)
+//  val linkBetweenNobodyAndSomebody = hasSocialConnection(mbjkhs, manWhoDoesntExist, "Mary")
+//  println("link nobody and somebody = " + linkBetweenNobodyAndSomebody)
+//  val linkBetweenTwoUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Kevin")
+//  println("link 2 unconnected people = " + linkBetweenTwoUnconnectedPeople)
+//  val linkBetweenConnectedAndUnconnectedPeople = hasSocialConnection(mbjkhs, "Harry", "Mary")
+//  println("link connected with unconnected = " + linkBetweenConnectedAndUnconnectedPeople)
+//  val linkDirectlyConnected = hasSocialConnection(mbjkhs, "John", "Mary")
+//  println("link directly connected = " + linkDirectlyConnected)
+//  val linkIndirectlyConnected = hasSocialConnection(mbjkhs, "John", "Sally")
+//  println("link indirectly connected = " + linkIndirectlyConnected)
 
-/*  val thePersonWithMostFriends = personWithMostFriends(mbjkh)
-  println("Most friends = " + thePersonWithMostFriends)
-  println("Num people with no friends = " + numPeopleNoFriends(mbjkh))
+//  val thePersonWithMostFriends = personWithMostFriends(mbjkh)
+//  println("Most friends = " + thePersonWithMostFriends)
+//  println("Num people with no friends = " + numPeopleNoFriends(mbjkh))
   val john1FriendedWithMary = friend(nwJohnBillMary, "John1", "Mary")
   println("John1 friended with Mary: " + john1FriendedWithMary)
-  println("Num John1's friends: " + numFriendsOfPerson(john1FriendedWithMary,"John1"))
-  val johnUnfriendedWithMary = unFriend(johnFriendedWithMary, "Mary", "John" )
-  println(johnUnfriendedWithMary)
+//  println("Num John1's friends: " + numFriendsOfPerson(john1FriendedWithMary,"John1"))
+  val johnUnfriendedWithMary = unfriend(johnFriendedWithMary, "Mary", "John" )
+  println("johnUnfriendedWithMary = " + johnUnfriendedWithMary)
+  val jFmRemovedJ = removePerson(johnFriendedWithMary, "John")
+  println ("jFmRemovedJ = " + jFmRemovedJ)
 
- */
 }
